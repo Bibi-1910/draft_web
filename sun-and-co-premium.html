@@ -1,0 +1,1762 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Sun & Co. — Premium Home & Electronics | Srivilliputtur</title>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;0,700;1,300;1,400&family=DM+Sans:wght@300;400;500;600&family=Tiro+Tamil&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/ScrollTrigger.min.js"></script>
+<style>
+/* ════════════════════════════════════════════════
+   TOKENS
+════════════════════════════════════════════════ */
+:root {
+  --ink:      #06091F;
+  --ink2:     #0C1035;
+  --navy:     #0F1650;
+  --red:      #B8121A;
+  --red-hi:   #E01A24;
+  --gold:     #C9982A;
+  --gold-lt:  #F0C866;
+  --gold-dim: #8A6A1A;
+  --cream:    #F5F0E8;
+  --mist:     #9AA0C0;
+  --glass:    rgba(255,255,255,0.04);
+  --border:   rgba(255,255,255,0.07);
+  --red-glow: rgba(184,18,26,0.25);
+  --gold-glow:rgba(201,152,42,0.25);
+}
+
+/* ════════════════════════════════════════════════
+   RESET & BASE
+════════════════════════════════════════════════ */
+*,*::before,*::after{margin:0;padding:0;box-sizing:border-box;}
+html{scroll-behavior:smooth;font-size:16px;}
+body{
+  font-family:'DM Sans',sans-serif;
+  background:var(--ink);
+  color:var(--cream);
+  overflow-x:hidden;
+  cursor:none;
+}
+a{text-decoration:none;color:inherit;}
+img{display:block;max-width:100%;}
+
+/* ════════════════════════════════════════════════
+   CUSTOM CURSOR
+════════════════════════════════════════════════ */
+#cursor{
+  position:fixed;width:12px;height:12px;
+  background:var(--gold);border-radius:50%;
+  pointer-events:none;z-index:99999;
+  transform:translate(-50%,-50%);
+  transition:width .3s,height .3s,background .3s,opacity .3s;
+  mix-blend-mode:normal;
+}
+#cursor-ring{
+  position:fixed;width:36px;height:36px;
+  border:1px solid rgba(201,152,42,0.5);
+  border-radius:50%;pointer-events:none;z-index:99998;
+  transform:translate(-50%,-50%);
+  transition:width .4s,height .4s,border-color .3s;
+}
+body:has(a:hover) #cursor,
+body:has(button:hover) #cursor{width:6px;height:6px;background:var(--red);}
+body:has(a:hover) #cursor-ring,
+body:has(button:hover) #cursor-ring{width:52px;height:52px;border-color:var(--red);}
+
+/* ════════════════════════════════════════════════
+   LOADER
+════════════════════════════════════════════════ */
+#loader{
+  position:fixed;inset:0;z-index:9999;
+  background:var(--ink);
+  display:flex;flex-direction:column;
+  align-items:center;justify-content:center;gap:24px;
+}
+.loader-emblem{
+  position:relative;
+  width:100px;height:100px;
+}
+.loader-emblem .le-ring{
+  position:absolute;inset:0;
+  border-radius:50%;
+  border:2px solid transparent;
+  border-top-color:var(--gold);
+  border-right-color:var(--red);
+  animation:spinRing 1.2s linear infinite;
+}
+.loader-emblem .le-ring2{
+  position:absolute;inset:12px;
+  border-radius:50%;
+  border:1px solid rgba(201,152,42,0.3);
+  border-bottom-color:var(--gold-lt);
+  animation:spinRing 2s linear infinite reverse;
+}
+.loader-emblem .le-s{
+  position:absolute;inset:20px;
+  background:rgba(201,152,42,0.1);
+  border-radius:50%;
+  display:flex;align-items:center;justify-content:center;
+  font-family:'Cormorant Garamond',serif;
+  font-size:28px;font-weight:700;
+  color:var(--gold-lt);
+  border:1px solid rgba(201,152,42,0.3);
+}
+@keyframes spinRing{to{transform:rotate(360deg);}}
+.loader-text{
+  font-family:'Cormorant Garamond',serif;
+  font-size:13px;letter-spacing:6px;text-transform:uppercase;
+  color:var(--mist);opacity:0;
+  animation:fadeIn .6s .8s forwards;
+}
+@keyframes fadeIn{to{opacity:1;}}
+.loader-bar{
+  width:200px;height:1px;
+  background:rgba(255,255,255,0.1);
+  position:relative;overflow:hidden;
+}
+.loader-bar::after{
+  content:'';position:absolute;
+  left:-100%;top:0;height:100%;width:100%;
+  background:linear-gradient(to right,transparent,var(--gold),transparent);
+  animation:barSlide 1.4s ease forwards;
+}
+@keyframes barSlide{to{left:100%;}}
+
+/* ════════════════════════════════════════════════
+   GRAIN OVERLAY
+════════════════════════════════════════════════ */
+#grain{
+  position:fixed;inset:0;z-index:9997;
+  pointer-events:none;opacity:.025;
+  background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)'/%3E%3C/svg%3E");
+  background-size:256px;
+}
+
+/* ════════════════════════════════════════════════
+   NAV
+════════════════════════════════════════════════ */
+nav{
+  position:fixed;top:0;left:0;right:0;z-index:1000;
+  padding:0 60px;height:72px;
+  display:flex;align-items:center;justify-content:space-between;
+  transition:all .5s;
+}
+nav.scrolled{
+  background:rgba(6,9,31,0.95);
+  backdrop-filter:blur(20px);
+  border-bottom:1px solid var(--border);
+  height:60px;
+}
+.nav-logo{display:flex;align-items:center;gap:16px;cursor:pointer;}
+.nl-emblem{
+  width:44px;height:44px;
+  position:relative;
+}
+.nl-emblem .e-ring{
+  position:absolute;inset:0;
+  border-radius:50%;
+  border:1.5px solid var(--gold-dim);
+  transition:border-color .3s;
+}
+.nl-emblem:hover .e-ring{border-color:var(--gold);}
+.nl-emblem .e-core{
+  position:absolute;inset:6px;
+  background:rgba(201,152,42,0.1);
+  border-radius:50%;
+  display:flex;align-items:center;justify-content:center;
+  font-family:'Cormorant Garamond',serif;
+  font-size:18px;font-weight:700;
+  color:var(--gold-lt);
+}
+.nl-text .en{
+  font-family:'Cormorant Garamond',serif;
+  font-size:19px;font-weight:600;
+  color:var(--cream);letter-spacing:.5px;line-height:1.1;
+}
+.nl-text .ta{
+  font-family:'Tiro Tamil',serif;
+  font-size:11px;color:var(--gold);letter-spacing:1px;
+}
+.nav-links{display:flex;gap:36px;list-style:none;align-items:center;}
+.nav-links a{
+  font-size:12px;font-weight:500;
+  letter-spacing:2px;text-transform:uppercase;
+  color:var(--mist);
+  transition:color .3s;
+  position:relative;
+}
+.nav-links a::after{
+  content:'';position:absolute;bottom:-4px;left:0;right:0;
+  height:1px;background:var(--gold);
+  transform:scaleX(0);transition:transform .4s;transform-origin:right;
+}
+.nav-links a:hover{color:var(--cream);}
+.nav-links a:hover::after{transform:scaleX(1);transform-origin:left;}
+.nav-call{
+  display:flex;align-items:center;gap:10px;
+  border:1px solid rgba(184,18,26,0.4);
+  padding:9px 20px;border-radius:2px;
+  font-size:12px;font-weight:600;letter-spacing:2px;text-transform:uppercase;
+  color:var(--cream);cursor:pointer;
+  transition:all .3s;background:transparent;font-family:'DM Sans',sans-serif;
+}
+.nav-call:hover{background:var(--red);border-color:var(--red);box-shadow:0 0 30px var(--red-glow);}
+.nav-call span{font-size:16px;}
+
+/* ════════════════════════════════════════════════
+   HERO
+════════════════════════════════════════════════ */
+#hero{
+  position:relative;height:100vh;min-height:720px;
+  display:flex;align-items:center;
+  overflow:hidden;
+}
+#three-canvas{position:absolute;inset:0;z-index:0;}
+
+.hero-vignette{
+  position:absolute;inset:0;z-index:1;
+  background:
+    radial-gradient(ellipse 60% 80% at 70% 50%, transparent 30%, rgba(6,9,31,.8) 100%),
+    linear-gradient(to right, rgba(6,9,31,.6) 0%, transparent 60%);
+}
+
+.hero-left{
+  position:relative;z-index:2;
+  max-width:680px;
+  padding:0 0 0 100px;
+}
+
+.hero-kicker{
+  display:flex;align-items:center;gap:12px;
+  margin-bottom:28px;
+  opacity:0;transform:translateY(20px);
+}
+.h-k-line{width:40px;height:1px;background:var(--red);}
+.h-k-text{
+  font-size:11px;letter-spacing:4px;text-transform:uppercase;
+  color:var(--gold);font-weight:500;
+}
+
+.hero-title{
+  font-family:'Cormorant Garamond',serif;
+  font-size:clamp(56px,7vw,96px);
+  font-weight:300;line-height:1.0;
+  color:var(--cream);
+  opacity:0;transform:translateY(30px);
+  margin-bottom:4px;
+}
+.hero-title .bold{font-weight:700;}
+.hero-title .red{color:var(--red);font-style:italic;}
+.hero-title .gold{color:var(--gold-lt);}
+
+.hero-tamil{
+  font-family:'Tiro Tamil',serif;
+  font-size:clamp(20px,2.5vw,32px);
+  color:rgba(201,152,42,.7);
+  letter-spacing:3px;
+  margin-bottom:24px;
+  opacity:0;transform:translateY(20px);
+}
+
+.hero-desc{
+  font-size:15px;font-weight:300;
+  color:var(--mist);line-height:1.8;
+  max-width:420px;margin-bottom:44px;
+  opacity:0;transform:translateY(20px);
+}
+
+.hero-actions{
+  display:flex;align-items:center;gap:20px;
+  opacity:0;transform:translateY(20px);
+  flex-wrap:wrap;
+}
+.btn-gold{
+  display:inline-flex;align-items:center;gap:10px;
+  background:linear-gradient(135deg,var(--gold),var(--gold-lt));
+  color:var(--ink);
+  border:none;padding:16px 36px;
+  font-family:'DM Sans',sans-serif;
+  font-size:12px;font-weight:700;letter-spacing:2px;text-transform:uppercase;
+  cursor:pointer;border-radius:2px;
+  transition:all .4s;
+  box-shadow:0 8px 40px rgba(201,152,42,0.3);
+}
+.btn-gold:hover{
+  transform:translateY(-3px);
+  box-shadow:0 16px 60px rgba(201,152,42,0.5);
+  letter-spacing:3px;
+}
+.btn-ghost{
+  display:inline-flex;align-items:center;gap:8px;
+  background:transparent;color:var(--cream);
+  border:none;padding:16px 0;
+  font-family:'DM Sans',sans-serif;
+  font-size:12px;font-weight:500;letter-spacing:2px;text-transform:uppercase;
+  cursor:pointer;
+  border-bottom:1px solid rgba(255,255,255,0.2);
+  transition:all .4s;
+}
+.btn-ghost:hover{color:var(--gold);border-color:var(--gold);gap:14px;}
+
+.hero-location{
+  position:absolute;bottom:48px;left:100px;z-index:2;
+  display:flex;align-items:center;gap:10px;
+  opacity:0;transform:translateY(20px);
+}
+.hl-pin{
+  width:6px;height:6px;
+  background:var(--red);border-radius:50%;
+  box-shadow:0 0 10px var(--red);
+  animation:pulse 2s ease infinite;
+}
+@keyframes pulse{
+  0%,100%{box-shadow:0 0 10px var(--red);}
+  50%{box-shadow:0 0 20px var(--red),0 0 40px rgba(184,18,26,.3);}
+}
+.hl-text{font-size:12px;letter-spacing:3px;color:var(--mist);text-transform:uppercase;}
+
+.hero-scroll-cue{
+  position:absolute;right:60px;bottom:48px;z-index:2;
+  display:flex;flex-direction:column;align-items:center;gap:10px;
+  opacity:0;
+}
+.hsc-label{font-size:10px;letter-spacing:4px;color:var(--mist);text-transform:uppercase;writing-mode:vertical-rl;}
+.hsc-bar{width:1px;height:60px;background:linear-gradient(to bottom,var(--gold),transparent);animation:scrollBar 2s ease infinite;}
+@keyframes scrollBar{0%{transform:scaleY(0);transform-origin:top;}50%{transform:scaleY(1);transform-origin:top;}51%{transform-origin:bottom;}100%{transform:scaleY(0);transform-origin:bottom;}}
+
+/* ════════════════════════════════════════════════
+   RIBBON / TICKER
+════════════════════════════════════════════════ */
+.ribbon{
+  height:48px;overflow:hidden;
+  border-top:1px solid rgba(184,18,26,.3);
+  border-bottom:1px solid rgba(184,18,26,.3);
+  background:rgba(184,18,26,.07);
+  display:flex;align-items:center;
+}
+.ribbon-track{
+  display:flex;gap:0;
+  animation:tick 28s linear infinite;
+  width:max-content;
+}
+.ribbon-item{
+  display:flex;align-items:center;gap:10px;
+  padding:0 36px;
+  font-size:11px;letter-spacing:3px;text-transform:uppercase;
+  color:var(--mist);white-space:nowrap;font-weight:500;
+}
+.ribbon-dot{color:var(--gold);font-size:18px;line-height:1;}
+@keyframes tick{from{transform:translateX(0);}to{transform:translateX(-50%);}}
+
+/* ════════════════════════════════════════════════
+   SECTION UTILITIES
+════════════════════════════════════════════════ */
+section{padding:130px 0;}
+.container{max-width:1240px;margin:0 auto;padding:0 60px;}
+
+.s-eyebrow{
+  display:inline-flex;align-items:center;gap:10px;
+  font-size:11px;letter-spacing:4px;text-transform:uppercase;
+  color:var(--gold);font-weight:500;
+  margin-bottom:16px;
+}
+.s-eyebrow::before{content:'';width:24px;height:1px;background:var(--red);}
+
+.s-heading{
+  font-family:'Cormorant Garamond',serif;
+  font-size:clamp(36px,4.5vw,64px);
+  font-weight:300;line-height:1.1;
+  color:var(--cream);margin-bottom:16px;
+}
+.s-heading em{font-weight:700;font-style:normal;color:var(--gold-lt);}
+.s-heading i{font-style:italic;color:var(--red);}
+
+.s-body{
+  font-size:15px;font-weight:300;
+  color:var(--mist);line-height:1.9;
+}
+
+.reveal-up{opacity:0;transform:translateY(50px);transition:opacity .9s cubic-bezier(.16,1,.3,1),transform .9s cubic-bezier(.16,1,.3,1);}
+.reveal-up.in{opacity:1;transform:none;}
+.reveal-left{opacity:0;transform:translateX(-50px);transition:opacity .9s cubic-bezier(.16,1,.3,1),transform .9s cubic-bezier(.16,1,.3,1);}
+.reveal-left.in{opacity:1;transform:none;}
+.reveal-right{opacity:0;transform:translateX(50px);transition:opacity .9s cubic-bezier(.16,1,.3,1),transform .9s cubic-bezier(.16,1,.3,1);}
+.reveal-right.in{opacity:1;transform:none;}
+
+/* ════════════════════════════════════════════════
+   ABOUT / IDENTITY
+════════════════════════════════════════════════ */
+#about{background:var(--ink);}
+.about-grid{display:grid;grid-template-columns:1fr 1fr;gap:100px;align-items:center;}
+
+.about-visual{
+  position:relative;
+  height:560px;
+}
+.av-card{
+  position:absolute;
+  background:linear-gradient(135deg,rgba(255,255,255,.05),rgba(255,255,255,.02));
+  border:1px solid var(--border);
+  border-radius:4px;
+  padding:32px;
+  backdrop-filter:blur(10px);
+}
+.av-main{
+  inset:0;bottom:auto;height:380px;
+  display:flex;align-items:center;justify-content:center;
+  background:linear-gradient(145deg,rgba(15,22,80,.6),rgba(6,9,31,.8));
+  border:1px solid rgba(201,152,42,.15);
+}
+.av-emblem-big{
+  text-align:center;
+}
+.aeb-ring-wrap{
+  width:200px;height:200px;
+  position:relative;margin:0 auto 24px;
+}
+.aeb-r1,.aeb-r2,.aeb-r3{
+  position:absolute;border-radius:50%;border:1px solid;
+}
+.aeb-r1{inset:0;border-color:rgba(201,152,42,.6);animation:spinRing 6s linear infinite;}
+.aeb-r2{inset:16px;border-color:rgba(184,18,26,.4);animation:spinRing 4s linear infinite reverse;}
+.aeb-r3{inset:32px;border-color:rgba(201,152,42,.3);animation:spinRing 8s linear infinite;}
+.aeb-core{
+  position:absolute;inset:48px;
+  background:rgba(201,152,42,.08);
+  border-radius:50%;
+  display:flex;align-items:center;justify-content:center;
+  font-family:'Cormorant Garamond',serif;
+  font-size:52px;font-weight:700;
+  color:var(--gold-lt);
+  border:1px solid rgba(201,152,42,.2);
+}
+.aeb-wings{
+  display:flex;align-items:center;justify-content:center;gap:16px;margin-bottom:12px;
+}
+.aeb-wing{display:flex;flex-direction:column;gap:3px;}
+.aeb-wing span{
+  display:block;height:2px;background:var(--red);border-radius:1px;
+  transition:width .3s;
+}
+.aeb-wing.l span:nth-child(1){width:60px;}
+.aeb-wing.l span:nth-child(2){width:46px;}
+.aeb-wing.l span:nth-child(3){width:32px;}
+.aeb-wing.r span{margin-left:auto;}
+.aeb-wing.r span:nth-child(1){width:60px;}
+.aeb-wing.r span:nth-child(2){width:46px;}
+.aeb-wing.r span:nth-child(3){width:32px;}
+.aeb-ta{font-family:'Tiro Tamil',serif;font-size:20px;color:var(--gold);}
+.aeb-en{font-family:'Cormorant Garamond',serif;font-size:13px;letter-spacing:5px;text-transform:uppercase;color:var(--mist);margin-top:4px;}
+
+.av-float1{
+  width:200px;bottom:0;right:-20px;
+  border-left:3px solid var(--red);
+  padding:24px;
+}
+.av-float1 .big{font-family:'Cormorant Garamond',serif;font-size:52px;font-weight:700;color:var(--red);line-height:1;}
+.av-float1 .lbl{font-size:11px;letter-spacing:2px;text-transform:uppercase;color:var(--mist);}
+
+.av-float2{
+  width:180px;top:40px;right:-40px;
+  border-top:3px solid var(--gold);
+  text-align:center;padding:20px;
+}
+.av-float2 .big{font-family:'Cormorant Garamond',serif;font-size:42px;font-weight:700;color:var(--gold-lt);line-height:1;}
+.av-float2 .lbl{font-size:11px;letter-spacing:2px;text-transform:uppercase;color:var(--mist);}
+
+.about-content{}
+.about-content .s-body{margin-bottom:40px;}
+
+.about-list{display:flex;flex-direction:column;gap:0;margin-bottom:40px;}
+.al-item{
+  display:flex;align-items:center;gap:16px;
+  padding:18px 0;
+  border-bottom:1px solid var(--border);
+  font-size:14px;font-weight:400;color:var(--cream);
+  transition:color .3s;
+}
+.al-item:hover{color:var(--gold);}
+.al-item::before{
+  content:'';width:8px;height:8px;flex-shrink:0;
+  background:var(--red);border-radius:50%;
+  box-shadow:0 0 8px var(--red);
+}
+
+/* ════════════════════════════════════════════════
+   CATEGORIES
+════════════════════════════════════════════════ */
+#categories{
+  background:var(--ink2);
+  position:relative;overflow:hidden;
+}
+#categories::before{
+  content:'';position:absolute;
+  top:50%;left:50%;transform:translate(-50%,-50%);
+  width:800px;height:800px;
+  background:radial-gradient(circle,rgba(201,152,42,.04),transparent 70%);
+  pointer-events:none;
+}
+
+.cat-header-row{
+  display:flex;justify-content:space-between;align-items:flex-end;
+  margin-bottom:64px;flex-wrap:wrap;gap:24px;
+}
+.cat-link{
+  font-size:12px;letter-spacing:3px;text-transform:uppercase;
+  color:var(--red);font-weight:500;
+  display:flex;align-items:center;gap:8px;
+  cursor:pointer;transition:gap .3s,color .3s;
+}
+.cat-link:hover{gap:14px;color:var(--gold);}
+
+.cat-grid{
+  display:grid;
+  grid-template-columns:repeat(4,1fr);
+  gap:2px;
+}
+.cat-card{
+  position:relative;
+  background:var(--glass);
+  border:1px solid var(--border);
+  padding:40px 28px;
+  cursor:pointer;
+  overflow:hidden;
+  transition:all .5s cubic-bezier(.16,1,.3,1);
+  transform-style:preserve-3d;
+}
+.cat-card::before{
+  content:'';position:absolute;
+  inset:0;
+  background:linear-gradient(135deg,rgba(184,18,26,.12),transparent);
+  opacity:0;transition:opacity .5s;
+}
+.cat-card::after{
+  content:'';position:absolute;
+  bottom:0;left:0;right:0;height:3px;
+  background:linear-gradient(to right,var(--red),var(--gold));
+  transform:scaleX(0);transform-origin:left;
+  transition:transform .5s cubic-bezier(.16,1,.3,1);
+}
+.cat-card:hover{
+  border-color:rgba(201,152,42,.2);
+  box-shadow:0 30px 80px rgba(0,0,0,.4);
+  z-index:2;
+}
+.cat-card:hover::before{opacity:1;}
+.cat-card:hover::after{transform:scaleX(1);}
+
+.cc-num{
+  font-family:'Cormorant Garamond',serif;
+  font-size:11px;letter-spacing:3px;color:var(--gold-dim);
+  margin-bottom:28px;
+  display:block;
+}
+.cc-icon{
+  font-size:44px;margin-bottom:20px;display:block;
+  transition:transform .5s cubic-bezier(.34,1.56,.64,1);
+  filter:drop-shadow(0 4px 12px rgba(0,0,0,.5));
+}
+.cat-card:hover .cc-icon{transform:scale(1.15) translateY(-6px);}
+
+.cc-name{
+  font-family:'Cormorant Garamond',serif;
+  font-size:20px;font-weight:600;
+  color:var(--cream);margin-bottom:6px;
+  transition:color .3s;
+}
+.cat-card:hover .cc-name{color:var(--gold-lt);}
+
+.cc-ta{
+  font-family:'Tiro Tamil',serif;
+  font-size:13px;color:var(--mist);
+  margin-bottom:16px;
+}
+.cc-arrow{
+  font-size:18px;color:var(--red);
+  opacity:0;transform:translateX(-8px);
+  transition:all .4s;
+  display:block;
+}
+.cat-card:hover .cc-arrow{opacity:1;transform:translateX(0);}
+
+/* ════════════════════════════════════════════════
+   STATS COUNTER
+════════════════════════════════════════════════ */
+#stats{
+  background:var(--ink);
+  border-top:1px solid var(--border);
+  border-bottom:1px solid var(--border);
+  padding:90px 0;
+}
+.stats-grid{
+  display:grid;grid-template-columns:repeat(4,1fr);
+  gap:0;
+}
+.stat-box{
+  text-align:center;
+  padding:40px 24px;
+  border-right:1px solid var(--border);
+  position:relative;
+}
+.stat-box:last-child{border-right:none;}
+.stat-box::before{
+  content:'';position:absolute;
+  top:0;left:50%;transform:translateX(-50%);
+  width:40px;height:2px;
+  background:linear-gradient(to right,var(--red),var(--gold));
+}
+.stat-num{
+  font-family:'Cormorant Garamond',serif;
+  font-size:clamp(48px,5vw,72px);
+  font-weight:300;
+  color:var(--cream);
+  line-height:1;
+  display:block;margin-bottom:8px;
+}
+.stat-num span{color:var(--gold);}
+.stat-label{
+  font-size:11px;letter-spacing:3px;text-transform:uppercase;
+  color:var(--mist);font-weight:500;
+}
+
+/* ════════════════════════════════════════════════
+   PRODUCTS SHOWCASE
+════════════════════════════════════════════════ */
+#products{background:var(--ink2);}
+.prod-intro{
+  display:grid;grid-template-columns:1fr 1fr;
+  gap:60px;align-items:end;
+  margin-bottom:64px;
+}
+.prod-intro-right{text-align:right;}
+
+.prod-scroll{
+  display:flex;gap:24px;
+  overflow-x:auto;
+  padding-bottom:20px;
+  scrollbar-width:thin;
+  scrollbar-color:var(--red) var(--border);
+  scroll-snap-type:x mandatory;
+}
+.prod-scroll::-webkit-scrollbar{height:2px;}
+.prod-scroll::-webkit-scrollbar-track{background:var(--border);}
+.prod-scroll::-webkit-scrollbar-thumb{background:var(--red);}
+
+.prod-card{
+  flex:0 0 320px;
+  scroll-snap-align:start;
+  background:linear-gradient(160deg,rgba(255,255,255,.05),rgba(255,255,255,.01));
+  border:1px solid var(--border);
+  border-radius:4px;overflow:hidden;
+  transition:all .5s cubic-bezier(.16,1,.3,1);
+  cursor:pointer;
+}
+.prod-card:hover{
+  border-color:rgba(201,152,42,.25);
+  box-shadow:0 24px 80px rgba(0,0,0,.5);
+  transform:translateY(-8px);
+}
+.pc-img{
+  height:200px;
+  background:linear-gradient(135deg,rgba(15,22,80,.9),rgba(6,9,31,.95));
+  display:flex;align-items:center;justify-content:center;
+  font-size:80px;
+  position:relative;overflow:hidden;
+}
+.pc-img::after{
+  content:'';position:absolute;
+  bottom:0;left:0;right:0;height:50%;
+  background:linear-gradient(to top,rgba(6,9,31,1),transparent);
+}
+.pc-badge{
+  position:absolute;top:16px;left:16px;
+  background:var(--red);color:var(--cream);
+  font-size:10px;font-weight:700;letter-spacing:2px;
+  padding:4px 12px;border-radius:1px;text-transform:uppercase;
+}
+.pc-body{padding:24px 28px 28px;}
+.pc-cat{font-size:10px;letter-spacing:3px;text-transform:uppercase;color:var(--gold);margin-bottom:8px;}
+.pc-name{
+  font-family:'Cormorant Garamond',serif;
+  font-size:22px;font-weight:600;
+  color:var(--cream);margin-bottom:8px;
+}
+.pc-desc{font-size:13px;font-weight:300;color:var(--mist);line-height:1.7;margin-bottom:20px;}
+.pc-foot{display:flex;align-items:center;justify-content:space-between;}
+.pc-price{font-family:'Cormorant Garamond',serif;font-size:20px;font-weight:600;color:var(--gold-lt);}
+.pc-btn{
+  background:transparent;color:var(--cream);
+  border:1px solid rgba(255,255,255,.15);
+  padding:8px 18px;border-radius:2px;
+  font-size:11px;font-weight:600;letter-spacing:2px;
+  text-transform:uppercase;cursor:pointer;
+  font-family:'DM Sans',sans-serif;
+  transition:all .3s;
+}
+.pc-btn:hover{background:var(--red);border-color:var(--red);}
+
+/* ════════════════════════════════════════════════
+   BRANDS
+════════════════════════════════════════════════ */
+#brands{
+  background:var(--ink);
+  padding:80px 0;
+  border-top:1px solid var(--border);
+}
+.brands-label{
+  text-align:center;
+  font-size:11px;letter-spacing:4px;text-transform:uppercase;
+  color:var(--mist);margin-bottom:48px;
+}
+.brands-row{
+  display:flex;gap:0;align-items:center;
+  flex-wrap:wrap;justify-content:center;
+}
+.brand-item{
+  padding:16px 40px;
+  border-right:1px solid var(--border);
+  font-family:'Cormorant Garamond',serif;
+  font-size:22px;font-weight:600;
+  color:rgba(154,160,192,.4);
+  transition:color .4s;
+  cursor:default;letter-spacing:1px;
+}
+.brand-item:last-child{border-right:none;}
+.brand-item:hover{color:var(--cream);}
+
+/* ════════════════════════════════════════════════
+   WHY DIGITAL (SALES SECTION FOR OWNER)
+════════════════════════════════════════════════ */
+#digital{
+  background:var(--ink2);
+  position:relative;overflow:hidden;
+}
+#digital::after{
+  content:'';position:absolute;
+  bottom:-200px;right:-200px;
+  width:600px;height:600px;
+  background:radial-gradient(circle,rgba(201,152,42,.06),transparent 70%);
+  pointer-events:none;
+}
+.digital-grid{display:grid;grid-template-columns:1fr 1fr;gap:100px;align-items:center;}
+
+.digital-cards{display:flex;flex-direction:column;gap:20px;}
+.dc{
+  display:flex;gap:20px;align-items:flex-start;
+  background:var(--glass);
+  border:1px solid var(--border);
+  border-left:3px solid var(--red);
+  border-radius:4px;
+  padding:24px 28px;
+  transition:all .4s;
+  opacity:0;transform:translateX(-30px);
+}
+.dc.in{opacity:1;transform:none;}
+.dc:hover{border-left-color:var(--gold);background:rgba(201,152,42,.04);}
+.dc-icon{
+  font-size:28px;flex-shrink:0;
+  width:52px;height:52px;
+  background:rgba(184,18,26,.1);
+  border-radius:4px;
+  display:flex;align-items:center;justify-content:center;
+  transition:background .3s;
+}
+.dc:hover .dc-icon{background:rgba(201,152,42,.12);}
+.dc-title{font-size:15px;font-weight:600;color:var(--cream);margin-bottom:6px;}
+.dc-desc{font-size:13px;font-weight:300;color:var(--mist);line-height:1.7;}
+
+/* ════════════════════════════════════════════════
+   TESTIMONIALS
+════════════════════════════════════════════════ */
+#testimonials{
+  background:var(--ink);
+  overflow:hidden;
+}
+.test-header{margin-bottom:60px;}
+.test-track{display:flex;gap:24px;overflow-x:auto;padding-bottom:16px;scroll-snap-type:x mandatory;scrollbar-width:none;}
+.test-track::-webkit-scrollbar{display:none;}
+.test-card{
+  flex:0 0 360px;scroll-snap-align:start;
+  background:var(--glass);
+  border:1px solid var(--border);
+  border-radius:4px;
+  padding:36px;
+  position:relative;
+  overflow:hidden;
+}
+.test-card::before{
+  content:'"';
+  position:absolute;top:-10px;right:20px;
+  font-family:'Cormorant Garamond',serif;
+  font-size:120px;font-weight:700;
+  color:rgba(201,152,42,.08);
+  line-height:1;
+}
+.test-stars{display:flex;gap:4px;margin-bottom:20px;}
+.test-stars span{color:var(--gold);font-size:14px;}
+.test-text{
+  font-family:'Cormorant Garamond',serif;
+  font-size:17px;font-weight:300;
+  font-style:italic;
+  color:var(--cream);line-height:1.7;margin-bottom:24px;
+}
+.test-author{display:flex;align-items:center;gap:12px;}
+.ta-av{
+  width:40px;height:40px;border-radius:50%;
+  background:linear-gradient(135deg,var(--red),var(--navy));
+  display:flex;align-items:center;justify-content:center;
+  font-family:'Cormorant Garamond',serif;
+  font-size:18px;font-weight:700;color:var(--cream);
+}
+.ta-name{font-size:14px;font-weight:600;color:var(--cream);}
+.ta-loc{font-size:12px;color:var(--gold);font-family:'Tiro Tamil',serif;}
+
+/* ════════════════════════════════════════════════
+   EMI
+════════════════════════════════════════════════ */
+#emi{
+  background:var(--ink2);
+  position:relative;overflow:hidden;
+}
+.emi-bg-text{
+  position:absolute;
+  top:50%;left:50%;transform:translate(-50%,-50%);
+  font-family:'Cormorant Garamond',serif;
+  font-size:200px;font-weight:700;
+  color:rgba(201,152,42,.03);
+  white-space:nowrap;
+  pointer-events:none;
+  letter-spacing:-10px;
+}
+.emi-inner{
+  display:grid;grid-template-columns:1fr 1fr;
+  gap:100px;align-items:center;
+  position:relative;z-index:1;
+}
+.emi-plans{display:grid;grid-template-columns:1fr 1fr;gap:16px;}
+.ep{
+  background:var(--glass);
+  border:1px solid var(--border);
+  border-radius:4px;
+  padding:28px 24px;
+  text-align:center;cursor:pointer;
+  transition:all .4s cubic-bezier(.34,1.56,.64,1);
+}
+.ep:hover,.ep.active{
+  background:rgba(184,18,26,.12);
+  border-color:var(--red);
+  transform:translateY(-4px);
+  box-shadow:0 12px 40px rgba(184,18,26,.2);
+}
+.ep-months{
+  font-family:'Cormorant Garamond',serif;
+  font-size:42px;font-weight:300;
+  color:var(--cream);line-height:1;margin-bottom:4px;
+}
+.ep-months span{color:var(--gold);}
+.ep-label{font-size:11px;letter-spacing:2px;text-transform:uppercase;color:var(--mist);}
+.ep-note{font-size:12px;color:var(--red);margin-top:8px;font-weight:500;}
+
+/* ════════════════════════════════════════════════
+   CONTACT
+════════════════════════════════════════════════ */
+#contact{background:var(--ink);}
+.contact-wrap{
+  display:grid;grid-template-columns:1fr 1fr;
+  gap:80px;align-items:start;
+}
+.c-items{display:flex;flex-direction:column;gap:0;}
+.c-item{
+  display:flex;gap:20px;align-items:flex-start;
+  padding:28px 0;
+  border-bottom:1px solid var(--border);
+}
+.ci-badge{
+  width:48px;height:48px;flex-shrink:0;
+  border:1px solid var(--border);
+  border-radius:4px;
+  display:flex;align-items:center;justify-content:center;
+  font-size:20px;
+  background:rgba(184,18,26,.08);
+  transition:all .3s;
+}
+.c-item:hover .ci-badge{border-color:var(--gold-dim);background:rgba(201,152,42,.08);}
+.ci-label{font-size:10px;letter-spacing:3px;text-transform:uppercase;color:var(--gold);margin-bottom:6px;}
+.ci-val{font-size:16px;font-weight:400;color:var(--cream);line-height:1.5;}
+.ci-val-ta{font-family:'Tiro Tamil',serif;font-size:13px;color:var(--mist);margin-top:3px;}
+
+.map-box{
+  background:var(--glass);
+  border:1px solid var(--border);
+  border-radius:4px;
+  height:440px;
+  position:relative;overflow:hidden;
+  display:flex;flex-direction:column;
+  align-items:center;justify-content:center;
+  gap:12px;
+}
+.map-box::before{
+  content:'';position:absolute;inset:0;
+  background:
+    linear-gradient(rgba(201,152,42,.03) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(201,152,42,.03) 1px, transparent 1px);
+  background-size:48px 48px;
+}
+.map-box::after{
+  content:'';position:absolute;
+  top:50%;left:50%;transform:translate(-50%,-50%);
+  width:200px;height:200px;
+  background:radial-gradient(circle,rgba(184,18,26,.15),transparent 70%);
+}
+.map-pin-big{
+  font-size:52px;z-index:1;
+  animation:pinFloat 3s ease infinite;
+  filter:drop-shadow(0 8px 20px rgba(184,18,26,.5));
+}
+@keyframes pinFloat{0%,100%{transform:translateY(0);}50%{transform:translateY(-12px);}}
+.map-name{font-family:'Cormorant Garamond',serif;font-size:22px;font-weight:600;color:var(--cream);z-index:1;}
+.map-addr{font-size:13px;color:var(--mist);z-index:1;letter-spacing:1px;}
+.map-ta{font-family:'Tiro Tamil',serif;font-size:14px;color:var(--gold);z-index:1;}
+
+/* ════════════════════════════════════════════════
+   FOOTER
+════════════════════════════════════════════════ */
+footer{
+  background:var(--ink);
+  border-top:1px solid var(--border);
+  padding:80px 0 40px;
+}
+.footer-top{
+  display:grid;grid-template-columns:2.5fr 1fr 1fr;
+  gap:60px;margin-bottom:60px;
+}
+.ft-brand{}
+.ft-logo{display:flex;align-items:center;gap:14px;margin-bottom:20px;}
+.ft-logo .e{
+  width:48px;height:48px;border:1px solid var(--gold-dim);
+  border-radius:50%;
+  display:flex;align-items:center;justify-content:center;
+  font-family:'Cormorant Garamond',serif;
+  font-size:22px;font-weight:700;color:var(--gold-lt);
+}
+.ft-logo .t .en{font-family:'Cormorant Garamond',serif;font-size:20px;font-weight:600;color:var(--cream);}
+.ft-logo .t .ta{font-family:'Tiro Tamil',serif;font-size:12px;color:var(--gold);}
+.ft-tagline{font-size:14px;font-weight:300;color:var(--mist);line-height:1.8;max-width:300px;margin-bottom:28px;}
+.ft-divider{width:40px;height:1px;background:var(--red);}
+
+.ft-col h4{
+  font-family:'Cormorant Garamond',serif;
+  font-size:18px;font-weight:600;
+  color:var(--cream);margin-bottom:24px;
+  position:relative;
+}
+.ft-col h4::after{
+  content:'';position:absolute;bottom:-8px;left:0;
+  width:20px;height:1px;background:var(--gold);
+}
+.ft-links{list-style:none;display:flex;flex-direction:column;gap:12px;}
+.ft-links a{
+  font-size:13px;font-weight:300;
+  color:var(--mist);transition:color .3s;
+  display:flex;align-items:center;gap:8px;
+}
+.ft-links a::before{content:'';width:4px;height:4px;background:var(--red);border-radius:50%;flex-shrink:0;opacity:0;transition:opacity .3s;}
+.ft-links a:hover{color:var(--gold);}
+.ft-links a:hover::before{opacity:1;}
+
+.footer-bottom{
+  display:flex;justify-content:space-between;align-items:center;
+  padding-top:40px;border-top:1px solid var(--border);
+  flex-wrap:wrap;gap:12px;
+}
+.fb-left p{font-size:12px;color:var(--mist);font-weight:300;}
+.fb-left .ta{font-family:'Tiro Tamil',serif;font-size:12px;color:var(--gold-dim);margin-top:4px;}
+.fb-wings{display:flex;align-items:center;gap:10px;}
+.fbw{display:flex;flex-direction:column;gap:3px;}
+.fbw span{height:2px;background:var(--red);border-radius:1px;display:block;}
+.fbw span:nth-child(1){width:48px;}
+.fbw span:nth-child(2){width:36px;}
+.fbw span:nth-child(3){width:24px;}
+.fbw.r span{margin-left:auto;}
+.fb-s{
+  font-family:'Cormorant Garamond',serif;
+  font-size:20px;font-weight:700;
+  color:var(--gold-lt);
+  width:32px;height:32px;
+  border:1px solid var(--gold-dim);
+  border-radius:50%;
+  display:flex;align-items:center;justify-content:center;
+}
+
+/* ════════════════════════════════════════════════
+   RESPONSIVE
+════════════════════════════════════════════════ */
+@media(max-width:900px){
+  nav{padding:0 24px;}
+  .nav-links{display:none;}
+  .hero-left{padding:0 24px;}
+  .container{padding:0 24px;}
+  .about-grid,.features-grid,.digital-grid,.emi-inner,.contact-wrap,.footer-top,.prod-intro{grid-template-columns:1fr;}
+  .about-visual{height:300px;}
+  .av-float1,.av-float2{display:none;}
+  .cat-grid{grid-template-columns:repeat(2,1fr);}
+  .stats-grid{grid-template-columns:repeat(2,1fr);}
+  .stat-box{border-bottom:1px solid var(--border);}
+  .brand-item{padding:12px 20px;font-size:18px;}
+}
+</style>
+</head>
+<body>
+
+<!-- GRAIN -->
+<div id="grain"></div>
+
+<!-- CURSOR -->
+<div id="cursor"></div>
+<div id="cursor-ring"></div>
+
+<!-- ══════════ LOADER ══════════ -->
+<div id="loader">
+  <div class="loader-emblem">
+    <div class="le-ring"></div>
+    <div class="le-ring2"></div>
+    <div class="le-s">S</div>
+  </div>
+  <div class="loader-text">Sun & Co. — Srivilliputtur</div>
+  <div class="loader-bar"></div>
+</div>
+
+<!-- ══════════ NAV ══════════ -->
+<nav id="nav">
+  <div class="nav-logo" onclick="window.scrollTo({top:0,behavior:'smooth'})">
+    <div class="nl-emblem">
+      <div class="e-ring"></div>
+      <div class="e-core">S</div>
+    </div>
+    <div class="nl-text">
+      <div class="en">Sun & Co.</div>
+      <div class="ta">சன் & கோ</div>
+    </div>
+  </div>
+  <ul class="nav-links">
+    <li><a href="#categories">Products</a></li>
+    <li><a href="#about">About</a></li>
+    <li><a href="#emi">EMI</a></li>
+    <li><a href="#testimonials">Reviews</a></li>
+    <li><a href="#contact">Find Us</a></li>
+  </ul>
+  <button class="nav-call" onclick="document.getElementById('contact').scrollIntoView({behavior:'smooth'})">
+    <span>📞</span> Call Now
+  </button>
+</nav>
+
+<!-- ══════════ HERO ══════════ -->
+<section id="hero">
+  <canvas id="three-canvas"></canvas>
+  <div class="hero-vignette"></div>
+  <div class="hero-left">
+    <div class="hero-kicker" id="hk">
+      <span class="h-k-line"></span>
+      <span class="h-k-text">Srivilliputtur's Finest Store</span>
+    </div>
+    <h1 class="hero-title" id="ht">
+      Where <span class="red">Homes</span><br>Come <span class="bold gold">Alive</span>
+    </h1>
+    <p class="hero-tamil" id="htm">சன் & கோ — உங்கள் கனவு இல்லம்</p>
+    <p class="hero-desc" id="hd">
+      Phones, refrigerators, smart TVs, beds, washing machines and everything your home deserves — all under one trusted roof in Srivilliputtur.
+    </p>
+    <div class="hero-actions" id="ha">
+      <button class="btn-gold" onclick="document.getElementById('categories').scrollIntoView({behavior:'smooth'})">
+        Explore Products →
+      </button>
+      <button class="btn-ghost" onclick="document.getElementById('contact').scrollIntoView({behavior:'smooth'})">
+        Find Our Store
+      </button>
+    </div>
+  </div>
+  <div class="hero-location" id="hl">
+    <div class="hl-pin"></div>
+    <span class="hl-text">Srivilliputtur, Virudhunagar Dist.</span>
+  </div>
+  <div class="hero-scroll-cue" id="hsc">
+    <span class="hsc-label">Scroll</span>
+    <div class="hsc-bar"></div>
+  </div>
+</section>
+
+<!-- RIBBON -->
+<div class="ribbon">
+  <div class="ribbon-track">
+    <div class="ribbon-item">Smartphones <span class="ribbon-dot">◆</span></div>
+    <div class="ribbon-item">Refrigerators <span class="ribbon-dot">◆</span></div>
+    <div class="ribbon-item">Smart TVs <span class="ribbon-dot">◆</span></div>
+    <div class="ribbon-item">Beds & Furniture <span class="ribbon-dot">◆</span></div>
+    <div class="ribbon-item">Washing Machines <span class="ribbon-dot">◆</span></div>
+    <div class="ribbon-item">Air Conditioners <span class="ribbon-dot">◆</span></div>
+    <div class="ribbon-item">Easy EMI Available <span class="ribbon-dot">◆</span></div>
+    <div class="ribbon-item">Free Home Delivery <span class="ribbon-dot">◆</span></div>
+    <div class="ribbon-item">Smartphones <span class="ribbon-dot">◆</span></div>
+    <div class="ribbon-item">Refrigerators <span class="ribbon-dot">◆</span></div>
+    <div class="ribbon-item">Smart TVs <span class="ribbon-dot">◆</span></div>
+    <div class="ribbon-item">Beds & Furniture <span class="ribbon-dot">◆</span></div>
+    <div class="ribbon-item">Washing Machines <span class="ribbon-dot">◆</span></div>
+    <div class="ribbon-item">Air Conditioners <span class="ribbon-dot">◆</span></div>
+    <div class="ribbon-item">Easy EMI Available <span class="ribbon-dot">◆</span></div>
+    <div class="ribbon-item">Free Home Delivery <span class="ribbon-dot">◆</span></div>
+  </div>
+</div>
+
+<!-- ══════════ ABOUT ══════════ -->
+<section id="about">
+  <div class="container">
+    <div class="about-grid">
+      <div class="about-visual reveal-left">
+        <div class="av-card av-main">
+          <div class="av-emblem-big">
+            <div class="aeb-ring-wrap">
+              <div class="aeb-r1"></div>
+              <div class="aeb-r2"></div>
+              <div class="aeb-r3"></div>
+              <div class="aeb-core">S</div>
+            </div>
+            <div class="aeb-wings">
+              <div class="aeb-wing l"><span></span><span></span><span></span></div>
+              <div style="color:var(--gold);font-size:14px;">✦</div>
+              <div class="aeb-wing r"><span></span><span></span><span></span></div>
+            </div>
+            <div class="aeb-ta">சன் & கோ</div>
+            <div class="aeb-en">Sun & Co. — Est. Srivilliputtur</div>
+          </div>
+        </div>
+        <div class="av-card av-float1 reveal-right">
+          <div class="big counter" data-target="10000">0</div>
+          <div class="lbl">Happy Families</div>
+        </div>
+        <div class="av-card av-float2 reveal-right">
+          <div class="big counter" data-target="500">0</div>
+          <div class="lbl">Products</div>
+        </div>
+      </div>
+      <div class="about-content">
+        <div class="reveal-up">
+          <p class="s-eyebrow">Our Story</p>
+          <h2 class="s-heading">Built on <em>Trust</em>,<br>Sold with <i>Heart</i></h2>
+          <p class="s-body" style="margin-bottom:32px;">
+            Sun & Co. has been the most trusted name for electronics and home goods in Srivilliputtur. We don't just sell products — we help families build their homes, one purchase at a time.
+          </p>
+        </div>
+        <ul class="about-list">
+          <li class="al-item reveal-up" style="transition-delay:.1s">Authorized dealer for all major brands</li>
+          <li class="al-item reveal-up" style="transition-delay:.2s">Genuine products with manufacturer warranty</li>
+          <li class="al-item reveal-up" style="transition-delay:.3s">Free home delivery across Srivilliputtur</li>
+          <li class="al-item reveal-up" style="transition-delay:.4s">Expert guidance for every purchase</li>
+          <li class="al-item reveal-up" style="transition-delay:.5s">Flexible EMI with zero paperwork hassle</li>
+        </ul>
+        <div class="reveal-up" style="transition-delay:.6s">
+          <button class="btn-gold" onclick="document.getElementById('contact').scrollIntoView({behavior:'smooth'})">Visit Our Store →</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ══════════ STATS ══════════ -->
+<section id="stats">
+  <div class="container">
+    <div class="stats-grid">
+      <div class="stat-box reveal-up">
+        <span class="stat-num"><span class="counter" data-target="10">0</span>K<span style="color:var(--gold)">+</span></span>
+        <span class="stat-label">Happy Families</span>
+      </div>
+      <div class="stat-box reveal-up" style="transition-delay:.1s">
+        <span class="stat-num"><span class="counter" data-target="500">0</span><span style="color:var(--gold)">+</span></span>
+        <span class="stat-label">Products In Store</span>
+      </div>
+      <div class="stat-box reveal-up" style="transition-delay:.2s">
+        <span class="stat-num"><span class="counter" data-target="20">0</span><span style="color:var(--gold)">+</span></span>
+        <span class="stat-label">Brand Partners</span>
+      </div>
+      <div class="stat-box reveal-up" style="transition-delay:.3s">
+        <span class="stat-num"><span class="counter" data-target="100">0</span><span style="color:var(--gold)">%</span></span>
+        <span class="stat-label">Genuine Products</span>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ══════════ CATEGORIES ══════════ -->
+<section id="categories">
+  <div class="container">
+    <div class="cat-header-row">
+      <div class="reveal-up">
+        <p class="s-eyebrow">What We Sell</p>
+        <h2 class="s-heading">Every Category<br>Your <em>Home Needs</em></h2>
+      </div>
+      <div class="cat-link reveal-up">View All Products →</div>
+    </div>
+    <div class="cat-grid">
+      <div class="cat-card reveal-up" style="transition-delay:0s">
+        <span class="cc-num">01</span>
+        <span class="cc-icon">📱</span>
+        <div class="cc-name">Smartphones</div>
+        <div class="cc-ta">செல்போன்கள்</div>
+        <span class="cc-arrow">→</span>
+      </div>
+      <div class="cat-card reveal-up" style="transition-delay:.08s">
+        <span class="cc-num">02</span>
+        <span class="cc-icon">📺</span>
+        <div class="cc-name">Smart TVs</div>
+        <div class="cc-ta">தொலைக்காட்சி</div>
+        <span class="cc-arrow">→</span>
+      </div>
+      <div class="cat-card reveal-up" style="transition-delay:.16s">
+        <span class="cc-num">03</span>
+        <span class="cc-icon">❄️</span>
+        <div class="cc-name">Refrigerators</div>
+        <div class="cc-ta">குளிர்சாதனம்</div>
+        <span class="cc-arrow">→</span>
+      </div>
+      <div class="cat-card reveal-up" style="transition-delay:.24s">
+        <span class="cc-num">04</span>
+        <span class="cc-icon">🌀</span>
+        <div class="cc-name">Washing Machines</div>
+        <div class="cc-ta">வாஷிங் மெஷின்</div>
+        <span class="cc-arrow">→</span>
+      </div>
+      <div class="cat-card reveal-up" style="transition-delay:.32s">
+        <span class="cc-num">05</span>
+        <span class="cc-icon">🛏️</span>
+        <div class="cc-name">Beds & Furniture</div>
+        <div class="cc-ta">படுக்கை & தளபாடம்</div>
+        <span class="cc-arrow">→</span>
+      </div>
+      <div class="cat-card reveal-up" style="transition-delay:.4s">
+        <span class="cc-num">06</span>
+        <span class="cc-icon">❄️</span>
+        <div class="cc-name">Air Conditioners</div>
+        <div class="cc-ta">ஏர் கண்டிஷனர்</div>
+        <span class="cc-arrow">→</span>
+      </div>
+      <div class="cat-card reveal-up" style="transition-delay:.48s">
+        <span class="cc-num">07</span>
+        <span class="cc-icon">🌀</span>
+        <div class="cc-name">Fans & Coolers</div>
+        <div class="cc-ta">மின்விசிறிகள்</div>
+        <span class="cc-arrow">→</span>
+      </div>
+      <div class="cat-card reveal-up" style="transition-delay:.56s">
+        <span class="cc-num">08</span>
+        <span class="cc-icon">🔌</span>
+        <div class="cc-name">Home Appliances</div>
+        <div class="cc-ta">வீட்டு உபகரணம்</div>
+        <span class="cc-arrow">→</span>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ══════════ PRODUCTS ══════════ -->
+<section id="products">
+  <div class="container">
+    <div class="prod-intro">
+      <div class="reveal-left">
+        <p class="s-eyebrow">Featured This Season</p>
+        <h2 class="s-heading">Top <em>Picks</em><br>& Best Deals</h2>
+      </div>
+      <div class="prod-intro-right reveal-right">
+        <p class="s-body">Scroll to explore. Every product is genuine, warranted and available for easy EMI.</p>
+      </div>
+    </div>
+    <div class="prod-scroll">
+      <div class="prod-card">
+        <div class="pc-img">📱<div class="pc-badge">New Arrival</div></div>
+        <div class="pc-body">
+          <div class="pc-cat">Smartphones</div>
+          <div class="pc-name">Latest Phones</div>
+          <div class="pc-desc">Samsung, Apple, Vivo, OPPO, Redmi — all models, all budgets. Walk in and compare.</div>
+          <div class="pc-foot">
+            <span class="pc-price">From ₹7,999</span>
+            <button class="pc-btn">Enquire</button>
+          </div>
+        </div>
+      </div>
+      <div class="prod-card">
+        <div class="pc-img">❄️<div class="pc-badge">Summer Deal</div></div>
+        <div class="pc-body">
+          <div class="pc-cat">Refrigerators</div>
+          <div class="pc-name">Refrigerators</div>
+          <div class="pc-desc">Single & double door, frost-free models. LG, Samsung, Whirlpool, Godrej — trusted brands.</div>
+          <div class="pc-foot">
+            <span class="pc-price">From ₹12,999</span>
+            <button class="pc-btn">Enquire</button>
+          </div>
+        </div>
+      </div>
+      <div class="prod-card">
+        <div class="pc-img">📺<div class="pc-badge">4K Ready</div></div>
+        <div class="pc-body">
+          <div class="pc-cat">Smart TVs</div>
+          <div class="pc-name">Smart Televisions</div>
+          <div class="pc-desc">32" to 75" 4K Android TVs. Sony, LG, Mi, Samsung — crystal clear picture for every home.</div>
+          <div class="pc-foot">
+            <span class="pc-price">From ₹11,999</span>
+            <button class="pc-btn">Enquire</button>
+          </div>
+        </div>
+      </div>
+      <div class="prod-card">
+        <div class="pc-img">🛏️<div class="pc-badge">Premium</div></div>
+        <div class="pc-body">
+          <div class="pc-cat">Furniture</div>
+          <div class="pc-name">Beds & Mattresses</div>
+          <div class="pc-desc">King, Queen & Single beds with premium mattresses. Crafted to last generations.</div>
+          <div class="pc-foot">
+            <span class="pc-price">From ₹8,500</span>
+            <button class="pc-btn">Enquire</button>
+          </div>
+        </div>
+      </div>
+      <div class="prod-card">
+        <div class="pc-img">🌀<div class="pc-badge">Top Rated</div></div>
+        <div class="pc-body">
+          <div class="pc-cat">Appliances</div>
+          <div class="pc-name">Washing Machines</div>
+          <div class="pc-desc">Front load & top load. IFB, LG, Samsung, Bosch — built for Indian conditions.</div>
+          <div class="pc-foot">
+            <span class="pc-price">From ₹14,999</span>
+            <button class="pc-btn">Enquire</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ══════════ BRANDS ══════════ -->
+<section id="brands">
+  <div class="container">
+    <div class="brands-label reveal-up">Trusted Brands We Carry</div>
+    <div class="brands-row reveal-up">
+      <div class="brand-item">Samsung</div>
+      <div class="brand-item">LG</div>
+      <div class="brand-item">Sony</div>
+      <div class="brand-item">Apple</div>
+      <div class="brand-item">Whirlpool</div>
+      <div class="brand-item">Godrej</div>
+      <div class="brand-item">IFB</div>
+      <div class="brand-item">Vivo</div>
+      <div class="brand-item">OPPO</div>
+      <div class="brand-item">Bosch</div>
+    </div>
+  </div>
+</section>
+
+<!-- ══════════ DIGITAL (SELL TO OWNER) ══════════ -->
+<section id="digital">
+  <div class="container">
+    <div class="digital-grid">
+      <div>
+        <p class="s-eyebrow reveal-up">Your Digital Advantage</p>
+        <h2 class="s-heading reveal-up">Your Customers<br>Are <em>Searching</em><br>Online — <i>Be There</i></h2>
+        <p class="s-body reveal-up" style="margin:24px 0 40px;">
+          In 2025, 7 out of 10 buyers search on their phone before stepping into a store. A professional website means customers from Virudhunagar, Rajapalayam and beyond will find Sun & Co. first.
+        </p>
+        <button class="btn-gold reveal-up" onclick="document.getElementById('contact').scrollIntoView({behavior:'smooth'})">
+          Make This Your Website →
+        </button>
+      </div>
+      <div class="digital-cards">
+        <div class="dc">
+          <div class="dc-icon">🔍</div>
+          <div>
+            <div class="dc-title">Get Found on Google</div>
+            <div class="dc-desc">When someone searches "fridge shop Srivilliputtur" — your store appears first, not a competitor.</div>
+          </div>
+        </div>
+        <div class="dc">
+          <div class="dc-icon">📱</div>
+          <div>
+            <div class="dc-title">Customers Trust What They See</div>
+            <div class="dc-desc">A premium website signals quality. Customers decide in 3 seconds whether to visit your store.</div>
+          </div>
+        </div>
+        <div class="dc">
+          <div class="dc-icon">🌙</div>
+          <div>
+            <div class="dc-title">Sells While You Sleep</div>
+            <div class="dc-desc">Enquiries, product views, directions — your website works 24/7 even when the store is closed.</div>
+          </div>
+        </div>
+        <div class="dc">
+          <div class="dc-icon">📈</div>
+          <div>
+            <div class="dc-title">Beat Local Competition</div>
+            <div class="dc-desc">Most shops in Srivilliputtur have no online presence. Be the first — and own the market.</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ══════════ TESTIMONIALS ══════════ -->
+<section id="testimonials">
+  <div class="container">
+    <div class="test-header">
+      <p class="s-eyebrow reveal-up">What Families Say</p>
+      <h2 class="s-heading reveal-up">Words from Our <em>Happy</em><br>Customers</h2>
+    </div>
+    <div class="test-track">
+      <div class="test-card reveal-up">
+        <div class="test-stars"><span>★</span><span>★</span><span>★</span><span>★</span><span>★</span></div>
+        <p class="test-text">"Bought my Samsung fridge and washing machine here. Best price in Srivilliputtur and free delivery the next day. Very trustworthy shop."</p>
+        <div class="test-author"><div class="ta-av">R</div><div><div class="ta-name">Ramamurthy S.</div><div class="ta-loc">சிவில்லிபுத்தூர்</div></div></div>
+      </div>
+      <div class="test-card reveal-up" style="transition-delay:.1s">
+        <div class="test-stars"><span>★</span><span>★</span><span>★</span><span>★</span><span>★</span></div>
+        <p class="test-text">"Got my daughter's bedroom furniture and LG TV from Sun & Co. EMI was easy, no stress. The staff explained everything patiently."</p>
+        <div class="test-author"><div class="ta-av">M</div><div><div class="ta-name">Meenakshi P.</div><div class="ta-loc">சிவில்லிபுத்தூர்</div></div></div>
+      </div>
+      <div class="test-card reveal-up" style="transition-delay:.2s">
+        <div class="test-stars"><span>★</span><span>★</span><span>★</span><span>★</span><span>★</span></div>
+        <p class="test-text">"I compared prices online and Sun & Co. matched every single one. And you get the personal service of a real shop. This is the best place here."</p>
+        <div class="test-author"><div class="ta-av">K</div><div><div class="ta-name">Karthik V.</div><div class="ta-loc">சிவில்லிபுத்தூர்</div></div></div>
+      </div>
+      <div class="test-card reveal-up" style="transition-delay:.3s">
+        <div class="test-stars"><span>★</span><span>★</span><span>★</span><span>★</span><span>★</span></div>
+        <p class="test-text">"Bought three phones for my family with zero-cost EMI. The owner treats every customer like family. We won't go anywhere else."</p>
+        <div class="test-author"><div class="ta-av">S</div><div><div class="ta-name">Selvam A.</div><div class="ta-loc">சிவில்லிபுத்தூர்</div></div></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ══════════ EMI ══════════ -->
+<section id="emi">
+  <div class="emi-bg-text">EMI</div>
+  <div class="container">
+    <div class="emi-inner">
+      <div>
+        <p class="s-eyebrow reveal-up">Flexible Payments</p>
+        <h2 class="s-heading reveal-up">Buy Now,<br>Pay at Your <em>Comfort</em></h2>
+        <p class="s-body reveal-up" style="margin:24px 0 0;">
+          Don't let the price stop your dream purchase. Sun & Co. offers flexible EMI options with all leading banks. Walk in, pick your product, and take it home today.
+        </p>
+      </div>
+      <div class="emi-plans reveal-right">
+        <div class="ep active">
+          <div class="ep-months"><span>3</span></div>
+          <div class="ep-label">Months</div>
+          <div class="ep-note">Low EMI</div>
+        </div>
+        <div class="ep">
+          <div class="ep-months"><span>6</span></div>
+          <div class="ep-label">Months</div>
+          <div class="ep-note">Popular</div>
+        </div>
+        <div class="ep">
+          <div class="ep-months"><span>12</span></div>
+          <div class="ep-label">Months</div>
+          <div class="ep-note">0% Interest</div>
+        </div>
+        <div class="ep">
+          <div class="ep-months"><span>24</span></div>
+          <div class="ep-label">Months</div>
+          <div class="ep-note">Extended</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ══════════ CONTACT ══════════ -->
+<section id="contact">
+  <div class="container">
+    <div style="margin-bottom:60px">
+      <p class="s-eyebrow reveal-up">Visit Us</p>
+      <h2 class="s-heading reveal-up">We're Right Here<br>in <em>Srivilliputtur</em></h2>
+    </div>
+    <div class="contact-wrap">
+      <div class="c-items">
+        <div class="c-item reveal-up">
+          <div class="ci-badge">📍</div>
+          <div>
+            <div class="ci-label">Store Address</div>
+            <div class="ci-val">Sun & Co., Srivilliputtur<br>Virudhunagar District, Tamil Nadu</div>
+            <div class="ci-val-ta">சன் & கோ, சிவில்லிபுத்தூர்</div>
+          </div>
+        </div>
+        <div class="c-item reveal-up" style="transition-delay:.1s">
+          <div class="ci-badge">📞</div>
+          <div>
+            <div class="ci-label">Phone</div>
+            <div class="ci-val">+91 XXXXX XXXXX</div>
+            <div class="ci-val-ta">தொடர்பு கொள்ளுங்கள்</div>
+          </div>
+        </div>
+        <div class="c-item reveal-up" style="transition-delay:.2s">
+          <div class="ci-badge">🕐</div>
+          <div>
+            <div class="ci-label">Store Hours</div>
+            <div class="ci-val">Mon – Sat &nbsp; 9:00 AM – 9:00 PM<br>Sunday &nbsp;&nbsp;&nbsp;&nbsp; 10:00 AM – 7:00 PM</div>
+          </div>
+        </div>
+        <div class="c-item reveal-up" style="transition-delay:.3s">
+          <div class="ci-badge">🏪</div>
+          <div>
+            <div class="ci-label">Nearest Landmark</div>
+            <div class="ci-val">Srivilliputtur Town Centre</div>
+            <div class="ci-val-ta">சிவில்லிபுத்தூர் நகர மையம்</div>
+          </div>
+        </div>
+      </div>
+      <div class="map-box reveal-right">
+        <div class="map-pin-big">📍</div>
+        <div class="map-name">Sun & Co.</div>
+        <div class="map-addr">Srivilliputtur, Tamil Nadu</div>
+        <div class="map-ta">சிவில்லிபுத்தூர்</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ══════════ FOOTER ══════════ -->
+<footer>
+  <div class="container">
+    <div class="footer-top">
+      <div class="ft-brand">
+        <div class="ft-logo">
+          <div class="e">S</div>
+          <div class="t">
+            <div class="en">Sun & Co.</div>
+            <div class="ta">சன் & கோ</div>
+          </div>
+        </div>
+        <p class="ft-tagline">Srivilliputtur's most trusted destination for electronics, appliances, and home furniture since years. Walk in and feel the difference.</p>
+        <div class="ft-divider"></div>
+      </div>
+      <div class="ft-col">
+        <h4>Products</h4>
+        <ul class="ft-links">
+          <li><a href="#categories">Smartphones</a></li>
+          <li><a href="#categories">Televisions</a></li>
+          <li><a href="#categories">Refrigerators</a></li>
+          <li><a href="#categories">Washing Machines</a></li>
+          <li><a href="#categories">Beds & Furniture</a></li>
+          <li><a href="#categories">Air Conditioners</a></li>
+        </ul>
+      </div>
+      <div class="ft-col">
+        <h4>Store</h4>
+        <ul class="ft-links">
+          <li><a href="#about">Our Story</a></li>
+          <li><a href="#brands">Brands</a></li>
+          <li><a href="#emi">EMI Options</a></li>
+          <li><a href="#testimonials">Reviews</a></li>
+          <li><a href="#contact">Find Us</a></li>
+        </ul>
+      </div>
+    </div>
+    <div class="footer-bottom">
+      <div class="fb-left">
+        <p>© 2025 Sun & Co. All rights reserved. Srivilliputtur, Tamil Nadu.</p>
+        <p class="ta">சன் & கோ — உங்கள் நம்பகமான கடை</p>
+      </div>
+      <div class="fb-wings">
+        <div class="fbw"><span></span><span></span><span></span></div>
+        <div class="fb-s">S</div>
+        <div class="fbw r"><span></span><span></span><span></span></div>
+      </div>
+    </div>
+  </div>
+</footer>
+
+<!-- ══════════════════════════════════════
+     SCRIPTS
+══════════════════════════════════════ -->
+<script>
+/* ── CUSTOM CURSOR ── */
+const cur = document.getElementById('cursor');
+const ring = document.getElementById('cursor-ring');
+let mx=0,my=0,rx=0,ry=0;
+document.addEventListener('mousemove',e=>{mx=e.clientX;my=e.clientY;cur.style.left=mx+'px';cur.style.top=my+'px';});
+(function animRing(){rx+=(mx-rx)*.12;ry+=(my-ry)*.12;ring.style.left=rx+'px';ring.style.top=ry+'px';requestAnimationFrame(animRing);})();
+
+/* ── LOADER ── */
+window.addEventListener('load',()=>{
+  setTimeout(()=>{
+    gsap.to('#loader',{opacity:0,duration:.8,ease:'power2.inOut',onComplete:()=>{
+      document.getElementById('loader').style.display='none';
+      animHero();
+    }});
+  },1600);
+});
+
+/* ── HERO ANIMATIONS ── */
+function animHero(){
+  gsap.to('#hk',{opacity:1,y:0,duration:.8,ease:'power3.out'});
+  gsap.to('#ht',{opacity:1,y:0,duration:1,delay:.15,ease:'power3.out'});
+  gsap.to('#htm',{opacity:1,y:0,duration:.8,delay:.3,ease:'power3.out'});
+  gsap.to('#hd',{opacity:1,y:0,duration:.8,delay:.45,ease:'power3.out'});
+  gsap.to('#ha',{opacity:1,y:0,duration:.8,delay:.6,ease:'power3.out'});
+  gsap.to('#hl',{opacity:1,y:0,duration:.8,delay:.8,ease:'power3.out'});
+  gsap.to('#hsc',{opacity:1,duration:.8,delay:1,ease:'power3.out'});
+}
+
+/* ── SCROLL REVEAL ── */
+const obs = new IntersectionObserver((entries)=>{
+  entries.forEach(e=>{if(e.isIntersecting)e.target.classList.add('in');});
+},{threshold:.12});
+document.querySelectorAll('.reveal-up,.reveal-left,.reveal-right').forEach(el=>obs.observe(el));
+
+const dcObs = new IntersectionObserver((entries)=>{
+  entries.forEach((e,i)=>{
+    if(e.isIntersecting) setTimeout(()=>e.target.classList.add('in'),i*120);
+  });
+},{threshold:.12});
+document.querySelectorAll('.dc').forEach(el=>dcObs.observe(el));
+
+/* ── NAV SCROLL ── */
+window.addEventListener('scroll',()=>{
+  document.getElementById('nav').classList.toggle('scrolled',window.scrollY>60);
+});
+
+/* ── COUNTER ── */
+function animateCounter(el){
+  const target=+el.dataset.target;
+  let current=0;
+  const step=target/60;
+  const t=setInterval(()=>{
+    current+=step;
+    if(current>=target){current=target;clearInterval(t);}
+    el.textContent=Math.floor(current).toLocaleString();
+  },20);
+}
+const cntObs=new IntersectionObserver((entries)=>{
+  entries.forEach(e=>{
+    if(e.isIntersecting){animateCounter(e.target);cntObs.unobserve(e.target);}
+  });
+},{threshold:.5});
+document.querySelectorAll('.counter').forEach(el=>cntObs.observe(el));
+
+/* ── 3D TILT ON CARDS ── */
+document.querySelectorAll('.cat-card,.prod-card,.test-card').forEach(card=>{
+  card.addEventListener('mousemove',e=>{
+    const r=card.getBoundingClientRect();
+    const x=(e.clientX-r.left)/r.width-.5;
+    const y=(e.clientY-r.top)/r.height-.5;
+    card.style.transform=`perspective(800px) rotateY(${x*12}deg) rotateX(${-y*10}deg) translateY(-8px)`;
+  });
+  card.addEventListener('mouseleave',()=>card.style.transform='');
+});
+
+/* ── EMI PILLS ── */
+document.querySelectorAll('.ep').forEach(ep=>{
+  ep.addEventListener('click',()=>{
+    document.querySelectorAll('.ep').forEach(p=>p.classList.remove('active'));
+    ep.classList.add('active');
+  });
+});
+
+/* ── HERO PARALLAX ── */
+window.addEventListener('scroll',()=>{
+  const y=window.scrollY;
+  const hl=document.querySelector('.hero-left');
+  if(hl&&y<window.innerHeight){
+    hl.style.transform=`translateY(${y*.25}px)`;
+    hl.style.opacity=1-y/700;
+  }
+});
+
+/* ══════════════════════════════════════
+   THREE.JS — HERO 3D RINGS (Logo-inspired)
+══════════════════════════════════════ */
+const canvas=document.getElementById('three-canvas');
+const renderer=new THREE.WebGLRenderer({canvas,antialias:true,alpha:true});
+renderer.setPixelRatio(Math.min(window.devicePixelRatio,2));
+renderer.setSize(window.innerWidth,window.innerHeight);
+
+const scene=new THREE.Scene();
+const camera=new THREE.PerspectiveCamera(55,window.innerWidth/window.innerHeight,.1,100);
+camera.position.set(0,0,6);
+
+// Fog
+scene.fog=new THREE.FogExp2(0x06091F,.08);
+
+// Central orb — glowing torus rings (like the logo emblem)
+const rings=[];
+const ringData=[
+  {r:1.8, tube:.012, color:0xC9982A, speed:.006, tilt:Math.PI/2},
+  {r:1.5, tube:.010, color:0xB8121A, speed:-.009, tilt:Math.PI/3},
+  {r:1.2, tube:.010, color:0xC9982A, speed:.012, tilt:Math.PI/6},
+  {r:2.2, tube:.008, color:0x8A6A1A, speed:-.005, tilt:.4},
+  {r:2.6, tube:.006, color:0xB8121A, speed:.004, tilt:.8},
+];
+ringData.forEach(d=>{
+  const g=new THREE.TorusGeometry(d.r,d.tube,12,80);
+  const m=new THREE.MeshBasicMaterial({color:d.color,transparent:true,opacity:.7});
+  const mesh=new THREE.Mesh(g,m);
+  mesh.rotation.x=d.tilt;
+  mesh.userData={speed:d.speed,tilt:d.tilt};
+  rings.push(mesh);
+  scene.add(mesh);
+});
+
+// Gold particles
+const ptGeo=new THREE.BufferGeometry();
+const ptCount=300;
+const ptPos=new Float32Array(ptCount*3);
+for(let i=0;i<ptCount;i++){
+  const theta=Math.random()*Math.PI*2;
+  const phi=Math.acos(2*Math.random()-1);
+  const r=2+Math.random()*4;
+  ptPos[i*3]=r*Math.sin(phi)*Math.cos(theta);
+  ptPos[i*3+1]=r*Math.sin(phi)*Math.sin(theta);
+  ptPos[i*3+2]=r*Math.cos(phi)-2;
+}
+ptGeo.setAttribute('position',new THREE.BufferAttribute(ptPos,3));
+const ptMat=new THREE.PointsMaterial({color:0xC9982A,size:.025,transparent:true,opacity:.6});
+scene.add(new THREE.Points(ptGeo,ptMat));
+
+// Red particles
+const pt2Geo=new THREE.BufferGeometry();
+const pt2Pos=new Float32Array(150*3);
+for(let i=0;i<150;i++){
+  pt2Pos[i*3]=(Math.random()-.5)*14;
+  pt2Pos[i*3+1]=(Math.random()-.5)*8;
+  pt2Pos[i*3+2]=(Math.random()-.5)*8-3;
+}
+pt2Geo.setAttribute('position',new THREE.BufferAttribute(pt2Pos,3));
+const pt2Mat=new THREE.PointsMaterial({color:0xB8121A,size:.018,transparent:true,opacity:.4});
+scene.add(new THREE.Points(pt2Geo,pt2Mat));
+
+let mouse={x:0,y:0};
+window.addEventListener('mousemove',e=>{mouse.x=(e.clientX/window.innerWidth-.5)*.3;mouse.y=(e.clientY/window.innerHeight-.5)*.15;});
+
+window.addEventListener('resize',()=>{
+  camera.aspect=window.innerWidth/window.innerHeight;
+  camera.updateProjectionMatrix();
+  renderer.setSize(window.innerWidth,window.innerHeight);
+});
+
+let t=0;
+(function animate(){
+  requestAnimationFrame(animate);
+  t+=.01;
+  rings.forEach((r,i)=>{
+    r.rotation.z+=r.userData.speed;
+    r.rotation.y+=r.userData.speed*.3;
+  });
+  camera.position.x+=(mouse.x-camera.position.x)*.03;
+  camera.position.y+=(-mouse.y-camera.position.y)*.03;
+  camera.lookAt(0,0,0);
+  renderer.render(scene,camera);
+})();
+</script>
+</body>
+</html>
